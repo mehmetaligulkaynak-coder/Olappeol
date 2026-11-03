@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <!-- iPhone ve Mobil Cihazlar İçin Tam Ekran, Çentik ve Ölçeklendirme Ayarları -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- iOS "Ana Ekrana Ekle" Tam Ekran Modu -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Sportik Spor Kulübü - Yoklama Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .brand-navy { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .brand-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+        
+        /* iOS Kesin Tam Ekran ve Taşma Çözümü */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 100vw;
+            height: 100vh;
+            height: -webkit-fill-available;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, sans-serif;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            /* iOS Çentik ve Alt Bar Güvenli Alan Doldurma */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        * {
+            box-sizing: border-box;
+        }
+        /* İçerik alanının tam sığması için esnek yapı */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header class="w-full brand-navy text-white py-3 px-4 shadow-lg flex items-center justify-between border-b border-slate-700 shrink-0">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 brand-orange rounded-xl flex items-center justify-center font-black text-sm shadow-md tracking-wider text-white">PSK</div>
+            <div>
+                <h1 class="text-xs font-black tracking-wider uppercase text-white">Sportik Spor Kulübü</h1>
+                <p class="text-[9px] text-slate-400 font-medium tracking-wide">Yüzme Akademisi & Yoklama Paneli</p>
+            </div>
+        </div>
+        <div class="flex gap-1.5">
+            <button onclick="openReportModal()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-orange-400 border border-slate-600 px-2.5 py-1.5 rounded-xl font-bold shadow transition flex items-center gap-1">
+                📊 Arşiv
+            </button>
+            <button onclick="resetApp()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-2.5 py-1.5 rounded-xl font-bold shadow transition">
+                🏠 Başa Dön
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-lg mx-auto p-3 flex-1 flex flex-col justify-start overflow-y-auto">
+
+        <!-- 1. ADIM: HOCA SEÇİMİ -->
+        <section id="step-coach" class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 w-full mt-2">
+            <div class="flex items-center gap-2 mb-3 border-b pb-2">
+                <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 font-bold text-xs flex items-center justify-center">1</span>
+                <h2 class="text-sm font-extrabold text-slate-800">Antrenör / Hoca Seçimi</h2>
+            </div>
+            <div id="coach-list" class="grid grid-cols-1 gap-2">
+                <!-- Dinamik Hocalar -->
+            </div>
+        </section>
+
+        <!-- 2. ADIM: ANA GRUP / OKUL GRUBU SEÇİMİ -->
+        <section id="step-group" class="hidden bg-white p-4 rounded-2xl card-shadow border border-slate-100 w-full mt-2">
+            <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 font-bold text-xs flex items-center justify-center">2</span>
+                    <h2 class="text-sm font-extrabold text-slate-800">Grup Seçimi</h2>
+                </div>
+                <span id="selected-coach-badge" class="text-[11px] bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full font-bold"></span>
+            </div>
+            <div id="group-list" class="grid grid-cols-1 gap-2 max-h-[50vh] overflow-y-auto pr-1">
+                <!-- Dinamik Gruplar -->
+            </div>
+        </section>
+
+        <!-- 2.B ADIM: OKUL GRUBU ALT KADEMELERİ -->
+        <section id="step-school-subgroup" class="hidden bg-white p-4 rounded-2xl card-shadow border border-slate-100 w-full mt-2">
+            <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 font-bold text-xs flex items-center justify-center">2</span>
+                    <h2 class="text-sm font-extrabold text-slate-800">Okul Grubu - Sınıf Seçimi</h2>
+                </div>
+                <button onclick="backToMainGroups()" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg font-bold">← Geri</button>
+            </div>
+            <div id="school-subgroup-list" class="grid grid-cols-1 gap-2 max-h-[50vh] overflow-y-auto pr-1">
+                <!-- Okul Alt Kademeleri -->
+            </div>
+        </section>
+
+        <!-- 3. ADIM: ÖĞRENCİ LİSTESİ, DİĞER ANTRENÖRLER VE KAYDETME -->
+        <section id="step-attendance" class="hidden bg-white p-4 rounded-2xl card-shadow border border-slate-100 w-full mt-2 flex-1 flex flex-col">
+            <div class="flex justify-between items-center mb-2.5 border-b pb-2">
+                <div>
+                    <h2 class="text-sm font-black text-slate-800" id="info-group-title">Grup Adı</h2>
+                    <p class="text-[11px] text-orange-600 font-bold mt-0.5" id="info-coach-title">Ana Antrenör</p>
+                </div>
+                <button onclick="saveAttendanceOnly()" class="brand-orange text-white text-xs px-3.5 py-2 rounded-xl font-bold shadow-md hover:opacity-95 transition flex items-center gap-1">
+                    💾 Kaydet
+                </button>
+            </div>
+
+            <!-- DERSE KATILAN DİĞER ANTRENÖRLER ALANI VE EKLEME -->
+            <div class="mb-2.5 p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <div class="flex justify-between items-center mb-1.5">
+                    <p class="text-[11px] font-bold text-slate-700">👨‍🏫 Diğer Antrenörler (Yardımcı):</p>
+                    <button onclick="openAddCoachModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-2 py-0.5 rounded-lg text-[10px] font-bold shadow transition">+ Ekle</button>
+                </div>
+                <div id="co-coach-checkboxes" class="grid grid-cols-2 gap-1.5 text-xs">
+                    <!-- Dinamik Diğer Antrenörler -->
+                </div>
+            </div>
+
+            <!-- Sayaç Paneli -->
+            <div class="grid grid-cols-3 gap-1.5 bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl text-xs mb-2.5 font-bold text-slate-600 text-center">
+                <div>Toplam: <span id="total-count" class="text-slate-900 block text-sm font-black">0</span></div>
+                <div>Katılan: <span id="present-count" class="text-green-600 block text-sm font-black">0</span></div>
+                <div>Gelmeyen: <span id="absent-count" class="text-red-500 block text-sm font-black">0</span></div>
+            </div>
+
+            <!-- Arama ve Ekleme Araçları -->
+            <div class="flex gap-2 mb-2">
+                <input type="text" id="student-search" placeholder="Öğrenci ara..." oninput="filterStudents()" class="flex-1 p-2.5 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-orange-500 bg-slate-50/50">
+                <button onclick="openAddStudentModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap shadow transition">+ Öğrenci</button>
+            </div>
+
+            <div class="flex gap-2 mb-2.5">
+                <button onclick="markAll(true)" class="flex-1 bg-emerald-50 text-emerald-700 border border-emerald-200/60 py-2 rounded-xl text-xs font-bold transition hover:bg-emerald-100">✅ Hepsini İşaretle</button>
+                <button onclick="markAll(false)" class="flex-1 bg-rose-50 text-rose-700 border border-rose-200/60 py-2 rounded-xl text-xs font-bold transition hover:bg-rose-100">❌ Temizle</button>
+            </div>
+
+            <!-- Öğrenci Listesi -->
+            <div class="flex-1 max-h-48 overflow-y-auto border border-slate-200/80 rounded-xl divide-y divide-slate-100" id="student-checkbox-list">
+                <!-- Dinamik Öğrenciler -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ARŞİV TABLO MODALI -->
+    <div id="report-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+        <div class="bg-white rounded-3xl p-4 w-full max-w-lg shadow-2xl max-h-[85vh] flex flex-col border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-2.5 mb-2.5">
+                <h3 class="font-black text-sm text-slate-800">📜 Yoklama Geçmişi Arşivi</h3>
+                <button onclick="closeReportModal()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 font-bold text-xs">✕</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto pr-1">
+                <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <th class="p-2">Fiş No</th>
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Grup / Detay</th>
+                                <th class="p-2 text-center">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archive-table-body" class="divide-y divide-slate-100">
+                            <!-- Dinamik Tablo Satırları -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t flex gap-2">
+                <button onclick="copyReportSummary()" class="flex-1 brand-orange text-white py-2.5 rounded-xl font-bold text-xs shadow-md">Arşivi Yedekle (Kopyala)</button>
+                <button onclick="closeReportModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-bold text-xs">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEKİL YOKLAMA İNCELEME & KOPYALAMA DETAY MODALI -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+        <div class="bg-white rounded-3xl p-4 w-full max-w-sm shadow-2xl border border-slate-100 flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center border-b pb-2.5 mb-2.5">
+                <div>
+                    <h3 id="detail-title" class="font-black text-xs text-slate-800">Yoklama Detayı</h3>
+                    <p id="detail-subtitle" class="text-[10px] text-orange-600 font-bold"></p>
+                    <p id="detail-co-coaches" class="text-[10px] text-slate-500 font-semibold mt-0.5"></p>
+                </div>
+                <button onclick="closeDetailModal()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 font-bold text-xs">✕</button>
+            </div>
+            
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-xs font-bold text-slate-600">Gelenler (<span id="detail-count" class="text-emerald-600 font-black">0</span>):</p>
+                <div class="flex gap-1">
+                    <button onclick="openAddStudentToArchiveModal()" class="bg-slate-900 text-white px-2 py-1 rounded-lg text-[10px] font-bold">+ Öğrenci</button>
+                    <button onclick="copyDetailToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow">📋 WhatsApp</button>
+                </div>
+            </div>
+
+            <div id="detail-student-list" class="flex-1 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 text-xs bg-slate-50">
+                <!-- Sadece gelenler burada listelenir -->
+            </div>
+
+            <button onclick="closeDetailModal()" class="mt-3 w-full bg-slate-900 text-white py-2 rounded-xl font-bold text-xs">Kapat</button>
+        </div>
+    </div>
+
+    <!-- ARŞİVE VERİTABANINDAN ÖĞRENCİ EKLEME MODALI -->
+    <div id="add-archive-student-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+        <div class="bg-white rounded-3xl p-4 w-full max-w-sm shadow-2xl border border-slate-100 flex flex-col max-h-[80vh]">
+            <h3 class="font-extrabold text-xs text-slate-800 mb-2">Arşive Veritabanından Öğrenci Ekle</h3>
+            <input type="text" id="archive-student-search" placeholder="Öğrenci ara..." oninput="filterArchiveStudentModal()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs font-semibold mb-2.5 focus:outline-none focus:border-orange-500 bg-slate-50">
+            <div id="archive-student-db-list" class="flex-1 overflow-y-auto border border-slate-200 rounded-xl p-1.5 space-y-1 text-xs bg-slate-50 max-h-40">
+                <!-- Dinamik Veritabanı Listesi -->
+            </div>
+            <div class="mt-2.5 flex gap-2">
+                <button onclick="closeAddArchiveStudentModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-bold transition">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SİSTEME YENİ ANTRENÖR EKLEME MODALI -->
+    <div id="add-coach-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+        <div class="bg-white rounded-3xl p-4 w-full max-w-sm shadow-2xl border border-slate-100">
+            <h3 class="font-extrabold text-xs text-slate-800 mb-2.5">Sisteme Yeni Antrenör Ekle</h3>
+            <input type="text" id="new-coach-name" placeholder="Antrenör Adı Soyadı" class="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold mb-3 focus:outline-none focus:border-orange-500 bg-slate-50">
+            <div class="flex gap-2">
+                <button onclick="closeAddCoachModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition">İptal</button>
+                <button onclick="addNewCoach()" class="flex-1 brand-orange text-white py-2.5 rounded-xl text-xs font-bold shadow-md transition">Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YENİ ÖĞRENCİ EKLEME MODALI -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+        <div class="bg-white rounded-3xl p-4 w-full max-w-sm shadow-2xl border border-slate-100">
+            <h3 class="font-extrabold text-xs text-slate-800 mb-2.5">Gruba Yeni Öğrenci Ekle</h3>
+            <input type="text" id="new-student-name" placeholder="Öğrenci Adı Soyadı" class="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold mb-3 focus:outline-none focus:border-orange-500 bg-slate-50">
+            <div class="flex gap-2">
+                <button onclick="closeAddStudentModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition">İptal</button>
+                <button onclick="addNewStudent()" class="flex-1 brand-orange text-white py-2.5 rounded-xl text-xs font-bold shadow-md transition">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÖĞRENCİ DÜZENLEME MODALI -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+        <div class="bg-white rounded-3xl p-4 w-full max-w-sm shadow-2xl border border-slate-100">
+            <h3 class="font-extrabold text-xs text-slate-800 mb-2.5">Öğrenci Düzenle / Not Ekle</h3>
+            <input type="text" id="edit-student-name" placeholder="Öğrenci Adı Soyadı" class="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold mb-2 focus:outline-none focus:border-orange-500 bg-slate-50">
+            <input type="text" id="edit-student-note" placeholder="Özel Not (Örn: Geç kalacak)" class="w-full p-3 border border-slate-200 rounded-xl text-xs mb-3 focus:outline-none focus:border-orange-500 bg-slate-50">
+            <div class="flex gap-2 mb-2">
+                <button onclick="closeEditStudentModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition">İptal</button>
+                <button onclick="saveStudentEdit()" class="flex-1 brand-orange text-white py-2.5 rounded-xl text-xs font-bold shadow-md transition">Güncelle</button>
+            </div>
+            <button onclick="deleteStudent()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 py-2.5 rounded-xl text-xs font-bold transition border border-rose-100">Listeden Sil</button>
+        </div>
+    </div>
+
+    <footer class="w-full text-center py-2 text-[10px] text-slate-400 font-medium shrink-0">
+        Sportik Spor Kulübü Yoklama Sistemi © 2026
+    </footer>
+
+    <script>
+        let coaches = [
+            "Burak Kirman", "Sümeyye Tuana Barut", "Ecrin Yıldırım", "Ömer Faruk",
+            "Gamze Demirtaş", "Ahmet Emin Katı", "İlay Kurtuluş", "Zeynep Nursu Kibar",
+            "Berkay Karabağ", "Merve Kaya"
+        ];
+
+        const mainGroups = [
+            "🏫 Okul Grubu",
+            "Sportik Temel 1 (Pzt-Çrş 18:00 - 19:00)",
+            "Sportik Temel 2 (Cmt-Pzr 11:00 - 12:00)",
+            "Dolunay Grubu (Cmt-Pzr 17:00 - 18:00)",
+            "Performans A",
+            "Performans B",
+            "Performans C",
+            "Kadın Grubu",
+            "Özel Ders Grubu"
+        ];
+
+        const schoolSubgroups = [
+            "Pazartesi 5. ve 6. Sınıflar (16:20 - 17:20)",
+            "Salı 4. Sınıflar (16:20 - 17:20)",
+            "Çarşamba 7. ve 8. Sınıflar (16:20 - 17:20)",
+            "Perşembe Lise Kızlar (16:20 - 17:20)",
+            "Cumartesi Lise Erkekler (13:30 - 14:30)"
+        ];
+
+        const baseStudents = [
+            "ADAR TAĞ", "AHMET ASAF ŞAHİN", "ALİ ASAF KANDEMİR", "ALİ KEREM", 
+            "ALİ OSMAN ALBAYRAK", "ALYA BERBER", "ALP ARDEN", "AMİNE DURU KILIÇ", 
+            "ARDA TONGELCİ", "ASEL MEMİŞ", "ASYA İMAL", "ATAHAN KILIÇ", 
+            "AYBÜKE TUĞAN", "AYLİN PAMUK", "AYŞE", "BARIŞ DOĞAN", 
+            "BEYZA ÇAĞLAYAN", "BUĞRA ARAS KÖROĞLU", "BUĞRA ÜNAL", "BURAK UÇAR", 
+            "ÇINAR AYAZ BEDİR", "ÇINAR ENES BAYRAM", "DEFNE KILIÇ", "DEFNE KILIF", 
+            "DERİN", "DİLA BERBER", "ECE UÇAR", "EGE DEMİR", "EGE YASİN", 
+            "ELİF ERCAN", "ELİF GÜLBİYİK", "ELİF HÜMA İYİDEN", "ELİF MEVA", 
+            "GAMZE", "GÖKÇE ZEHRA ŞAHİN", "HAFİZE AİŞE CEYLAN", "HAMZA EMİR ÇINAR", 
+            "HARUN İMAL", "İKRA ACAR", "İKRANUR ACAR", "LEVENT CİHAN", "LİNA AĞGÜN", 
+            "MEHMET YUSUF", "MELİKE BAYRAM", "MERT DENİZ YURTTAŞ", "MEVA YILDIRIM", 
+            "MİNA YILDIRIM", "NEHİR DEREN TUNCER", "NİSA DEMİR", "ÖMER AGAH ŞAHİN", 
+            "ÖMER FARUK AKTÜRK", "ÖM
